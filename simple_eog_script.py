@@ -36,7 +36,6 @@ EEG = 'exported_data/E004-1-1-1_sleep_EEG_PREP.edf'  # define path to EEG data (
 EOG = 'exported_data/E004-1-1-1_PSG.edf'  # define path to EOG data
 sampling_freq = 256  # define sampling frequency of EOG data
 
-# align hypnogram with EOG data
 # load in EEG data to access info such as recording start time
 EEG_sig = mne.io.read_raw_edf(EEG, exclude=['F5', 'FP1', 'FP2' 'F6', 'F10', 'F7', 'FC5', 'F3', 'F1', 'F2',
                                             'FC6', 'T9', 'FT7', 'FC3', 'FC1', 'FC2', 'FC4', 'FT8', 'T10',
