@@ -7,7 +7,7 @@ Simple script for loading in EOG data & playing around with peak detections and 
 - data visualisation (lines 161-169 inclusive) : see matplotlib.pyplot for more info
 
 author: @agpr141
-last update: 22/11/21
+last update: 23/11/21
 """
 
 # import modules - pip install these!
