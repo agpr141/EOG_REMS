@@ -77,7 +77,7 @@ epoch_buffer = 30  # buffer of 30s to introduce at the start and end of REM epis
 rem_episodes_e1 = []
 rem_episodes_e2 = []
 
-# extract all rem episodes, concatenate those occurring within 20 minutes of each other
+# extract all rem episodes
 for idx, row in rem_timings.iterrows():
     eog1 = EOG_sig.copy()
     eog1.pick(picks='E1')
