@@ -100,9 +100,9 @@ e2_ep = np.ndarray.flatten(e2_ep)
 e2_z = scipy.stats.zscore(e2_ep)
 
 # apply cleaning algorithm to each eog channel (filters)
-clean_e1 = nk.eog_clean(e1_z, sampling_rate=256, method='amber5')
+clean_e1 = nk.eog_clean(e1_z, sampling_rate=256, method='neurokit')
 e1_std = np.std(clean_e1)  # calculate standard dev
-clean_e2 = nk.eog_clean(e2_z, sampling_rate=256, method='amber5')
+clean_e2 = nk.eog_clean(e2_z, sampling_rate=256, method='neurokit')
 e2_std = np.std(clean_e2)  # calculate standard dev
 
 # find channel crossings where E1/E2 intersect for later detections
