@@ -1,5 +1,11 @@
 """
 Simple script for loading in EOG data & playing around with peak detections and plotting
+
+3 key things to play around with:
+- peak detection parameters (lines 111-118 inclusive) : see scipy.find_peaks for more info
+- peak agreement value- the difference in movement initiation between the eyes (lines 141-142, 150-151)
+- data visualisation (lines 161-169 inclusive) : see matplotlib.pyplot for more info
+
 author: @agpr141
 last update: 22/11/21
 """
@@ -23,12 +29,12 @@ def find_nearest(array, value):
 
 
 # import eog data, hypnogram & eeg data (for hypno alignment)
-path = Path('Y:/22qEEG/E004-1-1-1')  # define path to file
+path = Path('Y:/22qEEG/E004-1-1-1')  # define path to participant folder
 os.chdir(path)  # change working directory to path
-hypnogram = 'scoring_outputs/E004-1-1-1_scoring_info_novid.csv'
-EEG = 'exported_data/E004-1-1-1_sleep_EEG_PREP.edf'
-EOG = 'exported_data/E004-1-1-1_PSG.edf'
-sampling_freq = 256
+hypnogram = 'scoring_outputs/E004-1-1-1_scoring_info_novid.csv'  # define path to hypnogram
+EEG = 'exported_data/E004-1-1-1_sleep_EEG_PREP.edf'  # define path to EEG data (for hypnogram alignment timings)
+EOG = 'exported_data/E004-1-1-1_PSG.edf'  # define path to EOG data
+sampling_freq = 256  # define sampling frequency of EOG data
 
 # align hypnogram with EOG data
 # load in EEG data to access info such as recording start time
