@@ -1,7 +1,7 @@
 # EOG_REMS
 Code for REMs detection from EOG
 author @agpr141
-last edited 22/11/21
+last edited 23/11/21
 
 List of files within repository & functions
 
