@@ -67,9 +67,9 @@ annot = mne.Annotations(onset_secs, duration_secs, description, orig_time)  # cr
 EOG_sig.set_annotations(annot, emit_warning=True)  # align annotations object with EOG
 eog_annot = pd.DataFrame(EOG_sig.annotations)  # save EOG-aligned timings into new hypnogram dataframe
 
-# filter & plot EOG signal to get a sense of how the EOG changes across sleep stages
-EOG_filt = EOG_sig.copy().filter(l_freq=0.5, h_freq=10)  # filter signal for data visualisation
-EOG_filt.plot(show_first_samp=True, show_scrollbars=True, show_scalebars=True, time_format='clock')
+# filter & plot EOG signal to get a sense of how the EOG changes across sleep stages - commented out due to large computational load
+#EOG_filt = EOG_sig.copy().filter(l_freq=0.5, h_freq=10)  # filter signal for data visualisation
+#EOG_filt.plot(show_first_samp=True, show_scrollbars=True, show_scalebars=True, time_format='clock')
 
 # extract all rem episodes and store data for each eye as rem_episodes_e1/e2
 rem_timings = eog_annot[eog_annot['description'].str.contains('N|W|A') == False]  # find only REM episodes
@@ -93,16 +93,18 @@ for idx, row in rem_timings.iterrows():
 # peak detect
 # select which episode you want to peak detect on
 e1_ep = rem_episodes_e1[5]  # change this '0' to whatever episode you want to look at
-e1_ep = np.ndarray.flatten(e1_ep)
-e1_z = scipy.stats.zscore(e1_ep)
+e1_ep = np.ndarray.flatten(e1_ep)  # do not z-score - keep as raw values
+e1_uv = e1_ep * 1000000  # * data by 1e6 to make it uV not V
+#e1_z = scipy.stats.zscore(e1_ep)
 e2_ep = rem_episodes_e2[5]  # change this '0' to whatever episode you want to look at
-e2_ep = np.ndarray.flatten(e2_ep)
-e2_z = scipy.stats.zscore(e2_ep)
+e2_ep = np.ndarray.flatten(e2_ep)  # do not z-score- keep as raw values
+e2_uv = e2_ep * 1000000  # * data by 1e6 to make it uV not V
+#e2_z = scipy.stats.zscore(e2_ep)
 
 # apply cleaning algorithm to each eog channel (filters)
-clean_e1 = nk.eog_clean(e1_z, sampling_rate=256, method='neurokit')
+clean_e1 = nk.eog_clean(e1_uv, sampling_rate=256, method='neurokit')
 e1_std = np.std(clean_e1)  # calculate standard dev
-clean_e2 = nk.eog_clean(e2_z, sampling_rate=256, method='neurokit')
+clean_e2 = nk.eog_clean(e2_uv, sampling_rate=256, method='neurokit')
 e2_std = np.std(clean_e2)  # calculate standard dev
 
 # find channel crossings where E1/E2 intersect for later detections
