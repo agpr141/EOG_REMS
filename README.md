@@ -11,4 +11,4 @@ List of files within repository & functions
 
 * simple_eog_script.py: Example script which imports EOG data, aligns with EEG hypnogram, performs peak detection and plots output
 
-* REMS_Analyse folder: Contains all code & instructions for REMs analysis
+* REMs_Analysis folder: Contains all code & instructions for REMs analysis
