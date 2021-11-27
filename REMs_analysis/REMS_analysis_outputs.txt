@@ -1,0 +1,42 @@
+REMs Analysis Outputs
+
+1. rems_df  # this is a dataframe containing characteristics for each 'peak' (i.e. eye movement) during a REM sleep episode. It contains the following data:
+
+	Episode: 			The REM episode the peak belongs to (zero indexed)
+	Eye: 			Which eye made the movement (left or right)
+	Direction:			The direction of movement (left or right)
+	Peak Index:		The sample # at which the peak occurred. This is relative to the episode i.e. Peak Index of 500, Episode 1 
+				means the peak occurred 500 samples in to episode 1
+	Absolute Amplitude:	Amplitude of the peak in uV 
+	Relative Amplitude:		Amplitude of the peak in arbitrary units from z-scored data
+	Absolute Gradient:		Gradient of slope from local minima to peak (in relation to seconds)
+	Cross Gradient:		Gradient of slope from preceding channel crossing to peak (in relation to seconds)
+	Decay Gradient:		Gradient of slope from peak to following channel crossing (in relation to seconds)
+	Absolute Duration:		Duration of rise from local minima to peak (in seconds)
+	Cross Duration:		Duration of rise from preceding channel crossing to peak (in seconds)
+	Decay Duration:		Duration of decay from peak to following channel crossing (in seconds)
+	Prior Peak Distance:		Distance from preceding peak to current peak (in seconds) 
+	Post Peak Distance:		Distance from current peak to following peak (in seconds) 
+
+
+2. rems_cluster_df  # this is a dataframe containing characteristics for each 'cluster' (i.e. group of eye movements) during a REM sleep episode. It contains the following data:
+
+	Episode:			The REM episode the cluster belongs to (zero indexed)
+	Cluster Number:		The number of the cluster within the episode (i.e. 0 = first cluster that occurs in the episode) (zero indexed)
+	Cluster Intervals:		The duration between clusters (i.e. time frm the end of one cluster until the start of the next cluster) in seconds 
+	Avg Intracluster 
+	Interval:			The average interval between peaks within a cluster (in seconds)  
+	Cluster Peak Density:	Number of peaks/ second in a given cluster
+	Cluster Duration:		Duration of a cluster from the first peak until the last  **need to change this from first ch_crossing to the last**
+
+
+3. rems_microstates_df  # this is a dataframe containing data on macro characteristics of each episode. It contains the following data:
+	
+	Episode: 			The REM episode the data belongs to
+	Tonic Percentage:		The percentage of the REM episode spent in tonic REM
+	Phasic Percentage:		The percentage of the REM episode spent in phasic REM
+	Artefact Percentage:		The percentage of the REM episode with artefact
+	Total Duration:		The total duration of the REM episode in seconds
+	Total Tonic Duration:		The duration of time spent in tonic REM in seconds
+	Total Phasic Duration:	The duration of time spent in phasic REM in seconds
+	Total Artefact Duration:	The duration of time with artefact	
