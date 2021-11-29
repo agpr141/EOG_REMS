@@ -1,7 +1,7 @@
 """
 script to manually identify eye movements during REM sleep & analyse
 author: @agpr141
-last updated: 27/11/21
+last updated: 29/11/21
 """
 # ----------------------------------------------------------------------------------------------------------------------
 # SECTION 1  - import modules, specify file paths, align hypnogram to EOG file & extract REM periods
@@ -26,11 +26,11 @@ import warnings
 warnings.filterwarnings("ignore")
 
 # specify paths
-path = Path('Y:/22qEEG/E007-2-2-1')  # define path to participant folder
+path = Path('Y:/22qEEG/E004-1-1-1')  # define path to participant folder
 os.chdir(path)  # change working directory to path
-hypnogram = 'scoring_outputs/E007-2-2-1_scoring_info_vid.csv'  # define hypnogram path
-EEG = 'exported_data/E007-2-2-1_sleep_EEG_PREP.edf'  # define EEG data path (for hypnogram alignment)
-EOG = 'exported_data/E007-2-2-1_PSG.edf'  # define EOG data path
+hypnogram = 'scoring_outputs/E004-1-1-1_scoring_info_novid.csv'  # define hypnogram path
+EEG = 'exported_data/E004-1-1-1_sleep_EEG_PREP.edf'  # define EEG data path (for hypnogram alignment)
+EOG = 'exported_data/E004-1-1-1_PSG.edf'  # define EOG data path
 sampling_freq = 256  # define sampling frequency for EOG data
 
 # preprocess data & extract rem periods for each eog channel
@@ -59,47 +59,51 @@ rems_microstates_df = pandas.DataFrame()
 
 # manual peak detection for each REM episode - mark peaks or specify 'bad episode'. automatic analysis follows
 for episode in range(len(rem_episodes_e1)):
-    peak_range_start, peak_range_end, clean_e1, clean_e2, e1_peaks, e1_troughs, e2_peaks, e2_troughs, \
-    channel_crossings, bad_episode_list, good_episode_list, e1_uvd, e2_uvd = manual_peak_detect(episode, rem_episodes_e1,
-                                                                                rem_episodes_e2, bad_episode_list,
-                                                                                good_episode_list, episode_count)
-    episode_count += 1
-    # if episode is marked 'bad' it is excluded from further analysis
-    if episode in bad_episode_list:
-        print('episode', episode, 'is a bad episode. no analysis done.')
-    # if episode is marked 'good' you will be asked to manually mark artefacts. automatic analysis follows.
-    elif episode in good_episode_list:
-        # mark artefacts
-        start_art, end_art = plot_episode(e1_peaks, e2_peaks, e1_troughs, e2_troughs, e1_uvd, e2_uvd, episode)
-        e1_peaks, e1_troughs, e2_peaks, e2_troughs = remove_art_peaks(e1_peaks, e2_peaks, e1_troughs, e2_troughs,
-                                                                      start_art, end_art, episode)
-        # analyse peaks/troughs from each channel
-        rems_df_e1p = rems_analyse(clean_e1, e1_peaks, channel_crossings, 'Left', 'Left', e1_peaks, e1_troughs,
-                                   e2_peaks, e2_troughs, rem_episodes_e1, episode, invert=False)
+    try:
+        peak_range_start, peak_range_end, clean_e1, clean_e2, e1_peaks, e1_troughs, e2_peaks, e2_troughs, \
+        channel_crossings, bad_episode_list, good_episode_list, e1_uvd, e2_uvd = manual_peak_detect(episode, rem_episodes_e1,
+                                                                                    rem_episodes_e2, bad_episode_list,
+                                                                                    good_episode_list, episode_count)
+        episode_count += 1
+        # if episode is marked 'bad' it is excluded from further analysis
+        if episode in bad_episode_list:
+            print('episode', episode, 'is a bad episode. no analysis done.')
+        # if episode is marked 'good' you will be asked to manually mark artefacts. automatic analysis follows.
+        elif episode in good_episode_list:
+            # mark artefacts
+            start_art, end_art = plot_episode(e1_peaks, e2_peaks, e1_troughs, e2_troughs, e1_uvd, e2_uvd, episode)
+            e1_peaks, e1_troughs, e2_peaks, e2_troughs = remove_art_peaks(e1_peaks, e2_peaks, e1_troughs, e2_troughs,
+                                                                          start_art, end_art, episode)
+            # analyse peaks/troughs from each channel
+            rems_df_e1p = rems_analyse(clean_e1, e1_peaks, channel_crossings, 'Left', 'Left', e1_peaks, e1_troughs,
+                                       e2_peaks, e2_troughs, rem_episodes_e1, episode, invert=False)
 
-        rems_df_e1t = rems_analyse(clean_e1, e1_troughs, channel_crossings, 'Left', 'Right', e1_peaks, e1_troughs,
-                                   e2_peaks, e2_troughs, rem_episodes_e1, episode, invert=True)
+            rems_df_e1t = rems_analyse(clean_e1, e1_troughs, channel_crossings, 'Left', 'Right', e1_peaks, e1_troughs,
+                                       e2_peaks, e2_troughs, rem_episodes_e1, episode, invert=True)
 
-        rems_df_e2p = rems_analyse(clean_e2, e2_peaks, channel_crossings, 'Right', 'Right', e1_peaks, e1_troughs,
-                                   e2_peaks, e2_troughs, rem_episodes_e2, episode, invert=False)
+            rems_df_e2p = rems_analyse(clean_e2, e2_peaks, channel_crossings, 'Right', 'Right', e1_peaks, e1_troughs,
+                                       e2_peaks, e2_troughs, rem_episodes_e2, episode, invert=False)
 
-        rems_df_e2t = rems_analyse(clean_e2, e2_troughs, channel_crossings, 'Right', 'Left', e1_peaks, e1_troughs,
-                                   e2_peaks, e2_troughs, rem_episodes_e2, episode, invert=True)
+            rems_df_e2t = rems_analyse(clean_e2, e2_troughs, channel_crossings, 'Right', 'Left', e1_peaks, e1_troughs,
+                                       e2_peaks, e2_troughs, rem_episodes_e2, episode, invert=True)
 
-        rems_df = rems_df.append([rems_df_e1p, rems_df_e1t, rems_df_e2p, rems_df_e2t])  # compile rem characteristics
+            rems_df = rems_df.append([rems_df_e1p, rems_df_e1t, rems_df_e2p, rems_df_e2t])  # compile rem characteristics
 
-        remgram, rems_clusters, tonic_percentage, phasic_percentage, art_percentage, total_duration, total_ton_dur, \
-        total_phas_dur, total_art_dur = phasic_tonic_detections(e1_peaks, e2_peaks, e1_troughs, e2_troughs, clean_e1,
-                                                                episode, start_art, end_art)
+            remgram, rems_clusters, tonic_percentage, phasic_percentage, art_percentage, total_duration, total_ton_dur, \
+            total_phas_dur, total_art_dur = phasic_tonic_detections(e1_peaks, e2_peaks, e1_troughs, e2_troughs, clean_e1,
+                                                                    episode, start_art, end_art)
 
-        rems_cluster_df = rems_cluster_df.append(rems_clusters)  # compile cluster characteristics
+            rems_cluster_df = rems_cluster_df.append(rems_clusters)  # compile cluster characteristics
 
-        ep_list, tp_list, pp_list, td_list, ttd_list, tpd_list, ap_list, tad_list = initialise_tp_micro(
-            episode, tonic_percentage, phasic_percentage, ep_list, tp_list, pp_list, td_list, ttd_list, tpd_list,
-            total_duration, total_ton_dur, total_phas_dur, ap_list, tad_list, art_percentage, total_art_dur)
+            ep_list, tp_list, pp_list, td_list, ttd_list, tpd_list, ap_list, tad_list = initialise_tp_micro(
+                episode, tonic_percentage, phasic_percentage, ep_list, tp_list, pp_list, td_list, ttd_list, tpd_list,
+                total_duration, total_ton_dur, total_phas_dur, ap_list, tad_list, art_percentage, total_art_dur)
 
-    # compile microstate characteristics
-    rems_microstates_df = rems_microstates(ep_list, tp_list, pp_list, ap_list, td_list, ttd_list, tpd_list, tad_list)
+        # compile microstate characteristics
+        rems_microstates_df = rems_microstates(ep_list, tp_list, pp_list, ap_list, td_list, ttd_list, tpd_list, tad_list)
+    except:
+        print('episode', episode, ': something went wrong in the code. No analysis done. Analyse independently')
+        episode_count += 1
 sys.stdout.close()
 
 # ----------------------------------------------------------------------------------------------------------------------
