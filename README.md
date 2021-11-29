@@ -1,7 +1,8 @@
-# EOG_REMS
-Code for REMs detection from EOG
+# EOG_REMS Student Project
+
 author @agpr141
-last edited 26/11/21
+
+last edited 29/11/21
 
 List of files within repository & functions
 
