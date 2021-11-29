@@ -164,20 +164,24 @@ def manual_peak_detect(episode, rem_episodes_e1, rem_episodes_e2, bad_episode_li
 
 def find_peak_manual(sig, start, end):
     if sig[start:end].mean() > 0:  # if mean of signal slice is positive (greater than 0) - peaks
-        maximums = scipy.signal.argrelextrema(sig[start:end], np.greater)
-        if maximums[0].size == 0:
+        maximums = np.amax(sig[start:end])
+        maximums_idx = np.where(sig[start:end] == np.amax(sig[start:end]))
+        #maximums = scipy.signal.argrelextrema(sig[start:end], np.greater)
+        if maximums_idx[0].size == 0:
             loc_max_idx = end
         else:
-            loc_max_idx = start + maximums[0][0]
+            loc_max_idx = start + maximums_idx[0][0]
         peaks_intbng = True  # peaks?! (interrobang) set to True as it was peaks detected
     elif sig[start:end].mean() < 0:  # if mean of signal slice is negative (less than 0) - troughs
         segment = sig[start:end]
         slice_pos = segment * -1
-        maximums = scipy.signal.argrelextrema(slice_pos, np.greater)
-        if maximums[0].size == 0:
+        maximums = np.amax(slice_pos)
+        maximums_idx = np.where(slice_pos == np.amax(slice_pos))
+#        maximums = scipy.signal.argrelextrema(slice_pos, np.greater)
+        if maximums_idx[0].size == 0:
             loc_max_idx = end
         else:
-            loc_max_idx = start + maximums[0][0]
+            loc_max_idx = start + maximums_idx[0][0]
         peaks_intbng = False  # peaks?! (interrobang) set to False as it was troughs detected
     return loc_max_idx, peaks_intbng
 
