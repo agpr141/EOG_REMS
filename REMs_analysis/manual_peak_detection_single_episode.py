@@ -42,7 +42,7 @@ rem_episodes_e1, rem_episodes_e2, rem_timings = extract_rem_episodes(EEG, EOG, h
 # SECTION 2  - manual identification of peaks, mark bad episodes, mark artefacts, calculate rem, cluster & microstate characteristics
 
 # initialise variables to append to later
-sys.stdout = open('manual_processing_output_single_episode.txt', 'w')
+sys.stdout = open('manual_processing_output_single_episode{}.txt'.format(episode_to_analyse), 'w')
 rems_df = pandas.DataFrame()
 rems_cluster_df = pandas.DataFrame()
 episode_list = []
@@ -98,6 +98,6 @@ sys.stdout.close()
 # SECTION 3  - save outputs to csv files
 
 # save individual eye movement, cluster & microstate characteristics to .csv file format into participant folder
-rems_df.to_csv(path_or_buf='manual_rems_characteristics.csv', index_label='Peak Number in Ep')
-rems_cluster_df.to_csv(path_or_buf='manual_rems_clusters.csv', index=False)
-rems_microstates_df.to_csv(path_or_buf='manual_rems_microstates.csv', index=False)
+rems_df.to_csv(path_or_buf='manual_rems_characteristics_episode{}.csv'.format(episode_to_analyse), index_label='Peak Number in Ep')
+rems_cluster_df.to_csv(path_or_buf='manual_rems_clusters_episode{}.csv'.format(episode_to_analyse), index=False)
+rems_microstates_df.to_csv(path_or_buf='manual_rems_microstates_episode{}.csv'.format(episode_to_analyse), index=False)
