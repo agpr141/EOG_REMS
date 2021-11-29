@@ -1,7 +1,7 @@
 """
 script containing all functions required for REMs characterisation
 author: @agpr141
-last updated: 27/11/21
+last updated: 29/11/21
 
 """
 import mne
@@ -290,7 +290,7 @@ def remove_art_peaks(e1_peaks, e2_peaks, e1_troughs, e2_troughs, start_art, end_
         total_peaks = len(e1_peaks) + len(e1_troughs) + len(e2_peaks) + len(e2_troughs)
         total_rejected = len(rejected_e1_p) + len(rejected_e1_t) + len(rejected_e2_p) + len(rejected_e2_t)
         percent_rejected = (total_rejected / total_peaks) * 100
-        print('episode:', episode, '|  total peaks:', total_peaks, '|  total rejected:', total_rejected, '|  percent rejected:',
+        print('episode:', episode, '|  Analysis completed |  total peaks:', total_peaks, '|  total rejected due to artefact:', total_rejected, '|  percent rejected:',
               percent_rejected)
     elif len(start_art) == 0:
         true_e1_p = e1_peaks.copy()
@@ -300,7 +300,7 @@ def remove_art_peaks(e1_peaks, e2_peaks, e1_troughs, e2_troughs, start_art, end_
         total_peaks = len(e1_peaks) + len(e1_troughs) + len(e2_peaks) + len(e2_troughs)
         total_rejected = 0
         percent_rejected = 0
-        print('episode:', episode, 'total peaks:', total_peaks, '|  total rejected:', total_rejected, '|  percent rejected:',
+        print('episode:', episode, '|  Analysis completed |  total peaks:', total_peaks, '|  total rejected due to artefact:', total_rejected, '|  percent rejected:',
               percent_rejected)
     return true_e1_p, true_e1_t, true_e2_p, true_e2_t
 
