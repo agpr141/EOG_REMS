@@ -16,7 +16,7 @@ List of files within folder & functions:
 
 ###### Automatic Peak Detection Code & Instructions
 
-Coming soon!
+* automatic_peak_detection.py : Main analysis code for automatic peak detections. See detailed instructions in Automatic_REMs_Instructions.pdf
 
 ###### Common Code (used for both manual & automatic peak detection)
 
