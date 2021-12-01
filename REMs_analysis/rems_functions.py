@@ -268,6 +268,41 @@ def plot_episode(e1_peaks, e2_peaks, e1_troughs, e2_troughs, e1_uvd, e2_uvd, epi
     return start_art, end_art
 
 
+def mark_bad_or_artefact(e1_peaks, e2_peaks, e1_troughs, e2_troughs, e1_uvd, e2_uvd, episode, bad_episode_list, good_episode_list):
+    start_art = []  # only update with values when another bit of code is run for some reason
+    end_art = []  # only update with values when another bit of code is run for some reason
+
+    def on_click(event):
+        ax.set(facecolor='indianred')
+        bad_episode_list.append(episode)
+
+    def onselect(vmin, vmax):
+        start_art.append(vmin)
+        end_art.append(vmax)
+
+    fig, ax = plt.subplots()
+    ax.plot(e1_uvd, linewidth=0.8, color='navy', label='EOG1')
+    ax.plot(e2_uvd, linewidth=0.8, color='mediumblue', label='EOG2')
+    ax.plot(e1_peaks, e1_uvd[e1_peaks], 'o', color='darkred', label='EOG1 Peaks')
+    ax.plot(e2_peaks, e2_uvd[e2_peaks], 'o', color='darkorange', label='EOG2 Peaks')
+    ax.plot(e1_troughs, e1_uvd[e1_troughs], 'D', color='darkorange', label='EOG1 Troughs')
+    ax.plot(e2_troughs, e2_uvd[e2_troughs], 'D', color='darkred', label='EOG2 Troughs')
+    plt.title(label=['Mark *ARTEFACTS* (drag cursor): Episode', episode])
+    ax.legend(loc='upper right')
+    ax.set(facecolor='whitesmoke')
+    plt.xlabel('Samples', fontsize=10)
+    plt.ylabel('Voltage (uV)', fontsize=10)
+    axes = plt.axes([0.7, 0.9, 0.2, 0.075])
+    bbad = Button(axes, 'Bad Episode', color="indianred")
+    bbad.on_clicked(on_click)
+
+    rectprops = dict(facecolor='red', alpha=0.5)
+    span = mwidgets.SpanSelector(ax, onselect, 'horizontal',
+                                 rectprops=rectprops, span_stays=True)
+    plt.show(block=True)
+    return start_art, end_art, bad_episode_list, good_episode_list
+
+
 def remove_art_peaks(e1_peaks, e2_peaks, e1_troughs, e2_troughs, start_art, end_art, episode):
     true_e1_p = e1_peaks.copy()
     true_e1_t = e1_troughs.copy()
