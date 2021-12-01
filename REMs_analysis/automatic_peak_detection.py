@@ -110,6 +110,6 @@ sys.stdout.close()
 # SECTION 3  - save outputs to csv files
 
 # save individual eye movement, cluster & microstate characteristics to .csv file format into participant folder
-rems_df.to_csv(path_or_buf='rems_characteristics.csv', index_label='Peak Number in Ep')
-rems_cluster_df.to_csv(path_or_buf='rems_clusters.csv', index=False)
-rems_microstates_df.to_csv(path_or_buf='rems_microstates.csv', index=False)
+rems_df.to_csv(path_or_buf='automatic_rems_characteristics.csv', index_label='Peak Number in Ep')
+rems_cluster_df.to_csv(path_or_buf='automatic_rems_clusters.csv', index=False)
+rems_microstates_df.to_csv(path_or_buf='automatic_rems_microstates.csv', index=False)
