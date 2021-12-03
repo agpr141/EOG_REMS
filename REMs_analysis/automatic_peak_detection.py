@@ -1,7 +1,7 @@
 """
 script to automatically identify eye movements during REM sleep & analyse
 author: @agpr141]
-last updated: 01/12/12
+last updated: 03/12/12
 """
 # ----------------------------------------------------------------------------------------------------------------------
 # SECTION 1  - import modules, specify file paths, align hypnogram to EOG file & extract REM periods
@@ -96,8 +96,6 @@ for episode in range(len(rem_episodes_e1)):
             ep_list, tp_list, pp_list, td_list, ttd_list, tpd_list, ap_list, tad_list = initialise_tp_micro(
                 episode, tonic_percentage, phasic_percentage, ep_list, tp_list, pp_list, td_list, ttd_list, tpd_list,
                 total_duration, total_ton_dur, total_phas_dur, ap_list, tad_list, art_percentage, total_art_dur)
-
-            episode_count += 1
 
         rems_microstates_df = rems_microstates(ep_list, tp_list, pp_list, ap_list, td_list, ttd_list, tpd_list, tad_list)
 
