@@ -26,11 +26,11 @@ import warnings
 warnings.filterwarnings("ignore")
 
 # specify paths
-path = Path('Y:/22qEEG/E004-1-1-1')  # define path to participant folder
+path = Path('Y:/22qEEG/E006-1-1-1')  # define path to participant folder
 os.chdir(path)  # change working directory to path
-hypnogram = 'scoring_outputs/E004-1-1-1_scoring_info_novid.csv'  # define hypnogram path
-EEG = 'exported_data/E004-1-1-1_sleep_EEG_PREP.edf'  # define EEG data path (for hypnogram alignment)
-EOG = 'exported_data/E004-1-1-1_PSG.edf'  # define EOG data path
+hypnogram = 'scoring_outputs/E006-1-1-1_scoring_info_vid.csv'  # define hypnogram path
+EEG = 'exported_data/E006-1-1-1_sleep_EEG_PREP.edf'  # define EEG data path (for hypnogram alignment)
+EOG = 'exported_data/E006-1-1-1_PSG.edf'  # define EOG data path
 sampling_freq = 256  # define sampling frequency for EOG data
 
 # preprocess data & extract rem periods for each eog channel
