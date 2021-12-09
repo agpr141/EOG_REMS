@@ -69,6 +69,70 @@ def extract_rem_episodes(EEG, EOG, hypnogram):
     return rem_episodes_e1, rem_episodes_e2, rem_timings
 
 
+def extract_rem_episodes_aligned(edf, hypno):
+#    raw = mne.io.read_raw_edf(edf, misc=['M1', 'M2'],
+#                              preload=True, exclude=['MK', 'LArm', 'RArm', 'LeftArm', 'RightArm', 'EEG C4', 'EEG F4',
+#                                                     'EEG O2', 'EEG F3', 'EEG C3', 'EEG P3', 'EEG P4', 'EEG O1',
+#                                                     'EEG T7',
+#                                                     'EEG T8', 'EEG P7', 'EEG P8', 'EEG Fz', 'EEG Cz', 'EEG Pz',
+#                                                     'EEG Oz',
+#                                                     'EEG FT9', 'EEG FT10', 'EEG POz', 'EEG F1', 'EEG F2', 'EEG F5',
+#                                                     'EEG F6', 'EEG FC1', 'EEG FC2', 'EEG FC3', 'EEG FC4', 'EEG FC5',
+#                                                     'EEG FC6', 'EEG FT7', 'EEG FT8', 'EEG C1', 'EEG C2', 'EEG C5',
+#                                                     'EEG C6', 'EEG CP1', 'EEG CP2', 'EEG CP3', 'EEG CP4', 'EEG CP5',
+#                                                     'EEG CP6', 'EEG TP7', 'EEG TP8', 'EEG P1', 'EEG P2', 'EEG P5',
+#                                                     'EEG P6', 'EEG PO7', 'EEG PO8', 'EEG Fpz', 'ECG', 'EMG1', 'EMG2',
+#                                                     'EMG3', 'EEG Fp1', 'EEG Fp2', 'EEG AF7', 'EEG AF8', 'EEG F7',
+#                                                     'EEG F8'], verbose=0)  # load in edf
+    raw = mne.io.read_raw_edf(edf, misc=['M1', 'M2'],
+                              preload=True, exclude=['MK', 'LArm', 'RArm', 'LeftArm', 'RightArm', 'C4', 'F4',
+                                                     'O2', 'F3', 'C3', 'P3', 'P4', 'O1',
+                                                     'T7',
+                                                     'T8', 'P7', 'P8', 'Fz', 'Cz', 'Pz',
+                                                     'Oz',
+                                                     'FT9', 'FT10', 'POz', 'F1', 'F2', 'F5',
+                                                     'F6', 'FC1', 'FC2', 'FC3', 'FC4', 'FC5',
+                                                     'FC6', 'FT7', 'FT8', 'C1', 'C2', 'C5',
+                                                     'C6', 'CP1', 'CP2', 'CP3', 'CP4', 'CP5',
+                                                     'CP6', 'TP7', 'TP8', 'P1', 'P2', 'P5',
+                                                     'P6', 'PO7', 'PO8', 'Fpz', 'ECG', 'EMG1', 'EMG2',
+                                                     'EMG3', 'Fp1', 'Fp2', 'AF7', 'AF8', 'F7',
+                                                     'F8'], verbose=0)  # load in edf
+    # re-reference eog channels to mastoids & remove original combinations
+    raw_1 = mne.set_bipolar_reference(inst=raw, anode='E1', cathode='M2', ch_name='EOG1', drop_refs=True, copy=False)
+    raw_2 = mne.set_bipolar_reference(inst=raw_1, anode='E2', cathode='M1', ch_name='EOG2', drop_refs=True, copy=False)
+    raw = raw_2
+
+    # load hypnogram as annotations and manually annotate bad segments
+    hypno_pd = pd.read_csv(hypno)
+    hypnoannot = mne.read_annotations(hypno)
+    onset = hypno_pd.onset
+    duration = hypnoannot.duration
+    description = hypnoannot.description
+    orig_time = raw.info['meas_date']
+    annot = mne.Annotations(onset, duration, description, orig_time)
+    raw.set_annotations(annot, emit_warning=True)
+
+    # segment out REM periods only, store in 'rem_periods' eeg data of ndarray
+    rem_timings = hypno_pd[hypno_pd['description'].str.contains('N|W') == False]
+    rem_timings.drop(rem_timings[rem_timings['duration'] <= 60]. index, inplace=True)
+    epoch_buffer = 30
+    rem_episodes_e1 = []
+    rem_episodes_e2 = []
+    for idx, row in rem_timings.iterrows():
+        eog1 = raw.copy()
+        eog1.pick(picks='EOG1')
+        eog2 = raw.copy()
+        eog2.pick(picks='EOG2')
+        rem_onset = row['onset']
+        rem_offset = row['duration'] + row['onset']
+        e1_segment = eog1.crop(tmin=rem_onset + epoch_buffer, tmax=rem_offset - epoch_buffer)
+        e2_segment = eog2.crop(tmin=rem_onset + epoch_buffer, tmax=rem_offset - epoch_buffer)
+        rem_episodes_e1.append(e1_segment._data)
+        rem_episodes_e2.append(e2_segment._data)
+    return rem_episodes_e1, rem_episodes_e2, rem_timings
+
+
 def check_episode_quality(rem_episodes_e1, rem_episodes_e2):
     for episode in range(len(rem_episodes_e1)):
         ax.plot(rem_episodes_e1[episode], linewidth=0.7, color='steelblue', label='EOG1')
