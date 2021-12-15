@@ -69,6 +69,122 @@ def extract_rem_episodes(EEG, EOG, hypnogram):
     return rem_episodes_e1, rem_episodes_e2, rem_timings
 
 
+def extract_rem_episodes_ica(EEG, EOG, hypnogram):
+    # load in EEG data to access info such as recording start time
+    EEG_sig = mne.io.read_raw_edf(EEG, exclude=['F5', 'FP1', 'FP2' 'F6', 'F10', 'F7', 'FC5', 'F3', 'F1', 'F2',
+                                                'FC6', 'T9', 'FT7', 'FC3', 'FC1', 'FC2', 'FC4', 'FT8', 'T10',
+                                                'T7',
+                                                'C5', 'C3', 'C1', 'C2', 'C6', 'T8', 'TP9', 'TP7', 'CP5', 'CP1',
+                                                'CP2', 'CP6', 'TP8', 'TP10', 'P7', 'P5', 'P3', 'P1', 'P2', 'P4', 'P6',
+                                                'P8', 'AF4', 'P9', 'PO3', 'O1', 'PO4', 'P10', 'Oz', 'AF3', 'Fz',
+                                                'FCz', 'Cz', 'Pz', 'POz' 'F9', 'F6', 'FP2', 'POz', 'F4', 'F8', 'C4',
+                                                'O2'],
+                                  preload=True)  # load in sleep hypno
+
+    # load in EOG data
+    EOG_sig = mne.io.read_raw_edf(EOG, exclude=['ChinR', 'ChinL', 'EKG', 'Thorax', 'Abdomen', 'NasalPressure',
+                                                'Plethysmogram', 'Position', 'Sp02', 'Pulse'],
+                                  preload=True)  # load in EOG
+
+    # wrangle hypnogram data & match to EOG signal
+    hypno = pd.read_csv(hypnogram, names=['onset', 'offset', 'description'])  # units = minutes
+    onset = pd.Series.tolist(hypno['onset'])
+    offset = pd.Series.tolist(hypno['offset'])
+    onset_secs = [x * 60 for x in onset]  # convert onset times from minutes to seconds
+    duration = []  # initialise duration variable
+    for index in range(len(offset)):
+        dur = offset[index] - onset[index]  # duration = offset-onset
+        duration.append(dur)  # create new 'real' duration variable
+    duration_secs = [x * 60 for x in duration]
+    description = pd.Series.tolist(hypno['description'])
+    orig_time = EEG_sig.info['meas_date']  # find EEG original time for alignment
+    annot = mne.Annotations(onset_secs, duration_secs, description, orig_time)  # create new annotations object
+    EOG_sig.set_annotations(annot, emit_warning=True)  # align annotations object with EOG
+    eog_annot = pd.DataFrame(EOG_sig.annotations)  # save EOG-aligned timings into new hypnogram dataframe
+    # segment out REM periods only (must be over 60s to be analysed), store in 'rem_periods' eeg data of ndarray
+    rem_timings = eog_annot[eog_annot['description'].str.contains('N|W|A') == False]
+    rem_timings.drop(rem_timings[rem_timings['duration'] <= 60]. index, inplace=True)
+    epoch_buffer = 30  # buffer of 30s to introduce at the start and end of REM episode to exclude transitions
+    rem_episodes_e1 = []
+    rem_episodes_e2 = []
+    for idx, row in rem_timings.iterrows():
+        eog1 = EOG_sig.copy()
+        eog1.pick(picks='E1')
+        eog2 = EOG_sig.copy()
+        eog2.pick(picks='E2')
+        rem_onset = row['onset']
+        rem_offset = row['duration'] + row['onset']
+        e1_segment = eog1.crop(tmin=rem_onset + epoch_buffer, tmax=rem_offset - epoch_buffer)
+        e2_segment = eog2.crop(tmin=rem_onset + epoch_buffer, tmax=rem_offset - epoch_buffer)
+        rem_episodes_e1.append(e1_segment._data)
+        rem_episodes_e2.append(e2_segment._data)
+    return rem_episodes_e1, rem_episodes_e2, rem_timings
+
+
+def extract_rem_episodes_aligned(edf, hypno):
+#    raw = mne.io.read_raw_edf(edf, misc=['M1', 'M2'],
+#                              preload=True, exclude=['MK', 'LArm', 'RArm', 'LeftArm', 'RightArm', 'EEG C4', 'EEG F4',
+#                                                     'EEG O2', 'EEG F3', 'EEG C3', 'EEG P3', 'EEG P4', 'EEG O1',
+#                                                     'EEG T7',
+#                                                     'EEG T8', 'EEG P7', 'EEG P8', 'EEG Fz', 'EEG Cz', 'EEG Pz',
+#                                                     'EEG Oz',
+#                                                     'EEG FT9', 'EEG FT10', 'EEG POz', 'EEG F1', 'EEG F2', 'EEG F5',
+#                                                     'EEG F6', 'EEG FC1', 'EEG FC2', 'EEG FC3', 'EEG FC4', 'EEG FC5',
+#                                                     'EEG FC6', 'EEG FT7', 'EEG FT8', 'EEG C1', 'EEG C2', 'EEG C5',
+#                                                     'EEG C6', 'EEG CP1', 'EEG CP2', 'EEG CP3', 'EEG CP4', 'EEG CP5',
+#                                                     'EEG CP6', 'EEG TP7', 'EEG TP8', 'EEG P1', 'EEG P2', 'EEG P5',
+#                                                     'EEG P6', 'EEG PO7', 'EEG PO8', 'EEG Fpz', 'ECG', 'EMG1', 'EMG2',
+#                                                     'EMG3', 'EEG Fp1', 'EEG Fp2', 'EEG AF7', 'EEG AF8', 'EEG F7',
+#                                                     'EEG F8'], verbose=0)  # load in edf
+    raw = mne.io.read_raw_edf(edf, misc=['M1', 'M2'],
+                              preload=True, exclude=['MK', 'LArm', 'RArm', 'LeftArm', 'RightArm', 'C4', 'F4',
+                                                     'O2', 'F3', 'C3', 'P3', 'P4', 'O1',
+                                                     'T7',
+                                                     'T8', 'P7', 'P8', 'Fz', 'Cz', 'Pz',
+                                                     'Oz',
+                                                     'FT9', 'FT10', 'POz', 'F1', 'F2', 'F5',
+                                                     'F6', 'FC1', 'FC2', 'FC3', 'FC4', 'FC5',
+                                                     'FC6', 'FT7', 'FT8', 'C1', 'C2', 'C5',
+                                                     'C6', 'CP1', 'CP2', 'CP3', 'CP4', 'CP5',
+                                                     'CP6', 'TP7', 'TP8', 'P1', 'P2', 'P5',
+                                                     'P6', 'PO7', 'PO8', 'Fpz', 'ECG', 'EMG1', 'EMG2',
+                                                     'EMG3', 'Fp1', 'Fp2', 'AF7', 'AF8', 'F7',
+                                                     'F8'], verbose=0)  # load in edf
+    # re-reference eog channels to mastoids & remove original combinations
+    raw_1 = mne.set_bipolar_reference(inst=raw, anode='E1', cathode='M2', ch_name='EOG1', drop_refs=True, copy=False)
+    raw_2 = mne.set_bipolar_reference(inst=raw_1, anode='E2', cathode='M1', ch_name='EOG2', drop_refs=True, copy=False)
+    raw = raw_2
+
+    # load hypnogram as annotations and manually annotate bad segments
+    hypno_pd = pd.read_csv(hypno)
+    hypnoannot = mne.read_annotations(hypno)
+    onset = hypno_pd.onset
+    duration = hypnoannot.duration
+    description = hypnoannot.description
+    orig_time = raw.info['meas_date']
+    annot = mne.Annotations(onset, duration, description, orig_time)
+    raw.set_annotations(annot, emit_warning=True)
+
+    # segment out REM periods only, store in 'rem_periods' eeg data of ndarray
+    rem_timings = hypno_pd[hypno_pd['description'].str.contains('N|W') == False]
+    rem_timings.drop(rem_timings[rem_timings['duration'] <= 60]. index, inplace=True)
+    epoch_buffer = 30
+    rem_episodes_e1 = []
+    rem_episodes_e2 = []
+    for idx, row in rem_timings.iterrows():
+        eog1 = raw.copy()
+        eog1.pick(picks='EOG1')
+        eog2 = raw.copy()
+        eog2.pick(picks='EOG2')
+        rem_onset = row['onset']
+        rem_offset = row['duration'] + row['onset']
+        e1_segment = eog1.crop(tmin=rem_onset + epoch_buffer, tmax=rem_offset - epoch_buffer)
+        e2_segment = eog2.crop(tmin=rem_onset + epoch_buffer, tmax=rem_offset - epoch_buffer)
+        rem_episodes_e1.append(e1_segment._data)
+        rem_episodes_e2.append(e2_segment._data)
+    return rem_episodes_e1, rem_episodes_e2, rem_timings
+
+
 def check_episode_quality(rem_episodes_e1, rem_episodes_e2):
     for episode in range(len(rem_episodes_e1)):
         ax.plot(rem_episodes_e1[episode], linewidth=0.7, color='steelblue', label='EOG1')
@@ -163,6 +279,7 @@ def manual_peak_detect(episode, rem_episodes_e1, rem_episodes_e2, bad_episode_li
 
 
 def find_peak_manual(sig, start, end):
+    global loc_max_idx, peaks_intbng
     if sig[start:end].mean() > 0:  # if mean of signal slice is positive (greater than 0) - peaks
         maximums = np.amax(sig[start:end])
         maximums_idx = np.where(sig[start:end] == np.amax(sig[start:end]))
@@ -200,19 +317,28 @@ def matched_peaks_detection(episode, rem_episodes_e1, rem_episodes_e2):
     e1_std = np.std(clean_e1)
     clean_e2 = nk.eog_clean(e2_z, sampling_rate=256, method='neurokit')
     e2_std = np.std(clean_e2)
+
+    # apply cleaning algorithm to each eog channel (filters)
+    clean_e1uv = nk.eog_clean(e1_ep, sampling_rate=256, method='neurokit')
+    e1_uv = clean_e1uv * 1000000
+    e1_uvd = scipy.signal.detrend(e1_uv)
+    clean_e2uv = nk.eog_clean(e2_ep, sampling_rate=256, method='neurokit')
+    e2_uv = clean_e2uv * 1000000
+    e2_uvd = scipy.signal.detrend(e2_uv)
+
     # find channel crossings where E1/E2 intersect for later detections
     channel_crossings = np.argwhere(np.diff(np.sign(clean_e1 - clean_e2))).flatten()
 
-    # E1 peak detection - to change thresholds look at scipy.find_peaks()
-    e1_peaks, e1_properties = scipy.signal.find_peaks(clean_e1, prominence=(1.5 * e1_std))
+    # E1 peak detection - to change thresholds look at scipy.find_peaks()  scipy.signal.find_peaks(clean_e1, prominence=(1.5 * e1_std))
+    e1_peaks, e1_properties = scipy.signal.find_peaks(e1_uvd, height=25, distance=90, prominence=20)
     # E1 trough detection
-    e1_invert = clean_e1 * -1  # invert signal so troughs become peaks & can use find_peaks algorithm
-    e1_troughs, e1_trough_properties = scipy.signal.find_peaks(e1_invert, prominence=(1.5 * e1_std))
+    e1_invert = e1_uvd * -1  # invert signal so troughs become peaks & can use find_peaks algorithm
+    e1_troughs, e1_trough_properties = scipy.signal.find_peaks(e1_invert, height=25, distance=90, prominence=20)
     # E2 peak detection
-    e2_peaks, e2_properties = scipy.signal.find_peaks(clean_e2, prominence=(1.5 * e2_std))
+    e2_peaks, e2_properties = scipy.signal.find_peaks(e2_uvd, height=25, distance=90, prominence=20)
     # E2 trough detection
-    e2_invert = clean_e2 * -1  # invert signal so troughs become peaks & can use find_peaks algorithm
-    e2_troughs, e2_trough_properties = scipy.signal.find_peaks(e2_invert, prominence=(1.5 * e2_std))
+    e2_invert = e2_uvd * -1  # invert signal so troughs become peaks & can use find_peaks algorithm
+    e2_troughs, e2_trough_properties = scipy.signal.find_peaks(e2_invert, height=25, distance=90, prominence=20)
 
     # compare peak/trough indexes between eyes. keep those in agreement(w/i 76 (~330ms) samples of each other)
     matched_peaks = []
@@ -238,7 +364,7 @@ def matched_peaks_detection(episode, rem_episodes_e1, rem_episodes_e2):
             matched_troughs.append(match)
             e1_troughs_m.append(index)
             e2_peaks_m.append(match)
-    return clean_e1, clean_e2, channel_crossings, e1_peaks_m, e1_troughs_m, e2_peaks_m, e2_troughs_m
+    return clean_e1, clean_e2, channel_crossings, e1_peaks_m, e1_troughs_m, e2_peaks_m, e2_troughs_m, e1_uvd, e2_uvd
 
 
 def plot_episode(e1_peaks, e2_peaks, e1_troughs, e2_troughs, e1_uvd, e2_uvd, episode):
