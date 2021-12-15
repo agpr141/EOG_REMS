@@ -58,11 +58,11 @@ tpd_list = []  # initalise total phasic duration list
 tad_list = []  # initialise total art duration list
 rems_microstates_df = pandas.DataFrame()
 
-clean_e1, clean_e2, channel_crossings, e1_peaks, e1_troughs, e2_peaks, e2_troughs = \
+clean_e1, clean_e2, channel_crossings, e1_peaks, e1_troughs, e2_peaks, e2_troughs, e1_uvd, e2_uvd = \
     matched_peaks_detection(episode_to_analyse, rem_episodes_e1, rem_episodes_e2)
 
 start_art, end_art, bad_episode_list, good_episode_list = mark_bad_or_artefact(e1_peaks, e2_peaks, e1_troughs,
-                                                                               e2_troughs, clean_e1, clean_e2,
+                                                                               e2_troughs, e1_uvd, e2_uvd,
                                                                                episode_to_analyse, bad_episode_list,
                                                                                good_episode_list)
 
