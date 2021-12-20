@@ -70,16 +70,16 @@ e1_peaks, e1_troughs, e2_peaks, e2_troughs = remove_art_peaks(e1_peaks, e2_peaks
                                                               start_art, end_art, episode_to_analyse)
 # analyse peaks/troughs from each channel
 rems_df_e1p = rems_analyse(clean_e1, e1_peaks, channel_crossings, 'Left', 'Left', e1_peaks, e1_troughs,
-                           e2_peaks, e2_troughs, rem_episodes_e1, episode_to_analyse, invert=False)
+                           e2_peaks, e2_troughs, rem_episodes_e1, episode_to_analyse, is_peaks=True, invert=False)
 
 rems_df_e1t = rems_analyse(clean_e1, e1_troughs, channel_crossings, 'Left', 'Right', e1_peaks, e1_troughs,
-                           e2_peaks, e2_troughs, rem_episodes_e1, episode_to_analyse, invert=True)
+                           e2_peaks, e2_troughs, rem_episodes_e1, episode_to_analyse, is_peaks=False, invert=True)
 
 rems_df_e2p = rems_analyse(clean_e2, e2_peaks, channel_crossings, 'Right', 'Right', e1_peaks, e1_troughs,
-                           e2_peaks, e2_troughs, rem_episodes_e2, episode_to_analyse, invert=False)
+                           e2_peaks, e2_troughs, rem_episodes_e2, episode_to_analyse, is_peaks=True, invert=False)
 
 rems_df_e2t = rems_analyse(clean_e2, e2_troughs, channel_crossings, 'Right', 'Left', e1_peaks, e1_troughs,
-                           e2_peaks, e2_troughs, rem_episodes_e2, episode_to_analyse, invert=True)
+                           e2_peaks, e2_troughs, rem_episodes_e2, episode_to_analyse, is_peaks=False, invert=True)
 
 rems_df = rems_df.append([rems_df_e1p, rems_df_e1t, rems_df_e2p, rems_df_e2t])  # compile rem characteristics
 

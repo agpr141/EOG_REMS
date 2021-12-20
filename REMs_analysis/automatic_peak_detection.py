@@ -57,11 +57,11 @@ rems_microstates_df = pandas.DataFrame()
 # automatic peak detection for each REM episode - you mark 'bad episode' or artefacts. automatic analysis follows
 for episode in range(len(rem_episodes_e1)):
     try:
-        clean_e1, clean_e2, channel_crossings, e1_peaks, e1_troughs, e2_peaks, e2_troughs = \
+        clean_e1, clean_e2, channel_crossings, e1_peaks, e1_troughs, e2_peaks, e2_troughs, e1_uvd, e2_uvd = \
             matched_peaks_detection(episode, rem_episodes_e1, rem_episodes_e2)
 
         start_art, end_art, bad_episode_list, good_episode_list = mark_bad_or_artefact(e1_peaks, e2_peaks, e1_troughs,
-                                                                                       e2_troughs, clean_e1, clean_e2,
+                                                                                       e2_troughs, e1_uvd, e2_uvd,
                                                                                        episode, bad_episode_list,
                                                                                        good_episode_list)
         episode_count += 1
@@ -74,16 +74,16 @@ for episode in range(len(rem_episodes_e1)):
                                                                           end_art, episode)
 
             rems_df_e1p = rems_analyse(clean_e1, e1_peaks, channel_crossings, 'Left', 'Left', e1_peaks, e1_troughs, e2_peaks, e2_troughs,
-                             rem_episodes_e1, episode, invert=False)
+                             rem_episodes_e1, episode, is_peaks=True, invert=False)
 
             rems_df_e1t = rems_analyse(clean_e1, e1_troughs, channel_crossings, 'Left', 'Right', e1_peaks, e1_troughs, e2_peaks,
-                             e2_troughs, rem_episodes_e1, episode, invert=True)
+                             e2_troughs, rem_episodes_e1, episode, is_peaks=False, invert=True)
 
             rems_df_e2p = rems_analyse(clean_e2, e2_peaks, channel_crossings, 'Right', 'Right', e1_peaks, e1_troughs, e2_peaks,
-                             e2_troughs, rem_episodes_e2, episode, invert=False)
+                             e2_troughs, rem_episodes_e2, episode, is_peaks=True, invert=False)
 
             rems_df_e2t = rems_analyse(clean_e2, e2_troughs, channel_crossings, 'Right', 'Left', e1_peaks, e1_troughs, e2_peaks,
-                             e2_troughs, rem_episodes_e2, episode, invert=True)
+                             e2_troughs, rem_episodes_e2, episode, is_peaks=False, invert=True)
 
             rems_df = rems_df.append([rems_df_e1p, rems_df_e1t, rems_df_e2p, rems_df_e2t])
 

@@ -26,11 +26,11 @@ import warnings
 warnings.filterwarnings("ignore")
 
 # specify paths
-path = Path('Y:/22qEEG/E006-1-1-1')  # define path to participant folder
+path = Path('Y:/22qEEG/E007-2-2-1')  # define path to participant folder
 os.chdir(path)  # change working directory to path
-hypnogram = 'scoring_outputs/E006-1-1-1_scoring_info_vid.csv'  # define hypnogram path
-EEG = 'exported_data/E006-1-1-1_sleep_EEG_PREP.edf'  # define EEG data path (for hypnogram alignment)
-EOG = 'exported_data/E006-1-1-1_PSG.edf'  # define EOG data path
+hypnogram = 'scoring_outputs/E007-2-2-1_scoring_info_vid.csv'  # define hypnogram path
+EEG = 'exported_data/E007-2-2-1_sleep_EEG_PREP.edf'  # define EEG data path (for hypnogram alignment)
+EOG = 'exported_data/E007-2-2-1_PSG.edf'  # define EOG data path
 sampling_freq = 256  # define sampling frequency for EOG data
 
 # preprocess data & extract rem periods for each eog channel
@@ -75,17 +75,17 @@ for episode in range(len(rem_episodes_e1)):
             e1_peaks, e1_troughs, e2_peaks, e2_troughs = remove_art_peaks(e1_peaks, e2_peaks, e1_troughs, e2_troughs,
                                                                           start_art, end_art, episode)
             # analyse peaks/troughs from each channel
-            rems_df_e1p = rems_analyse(clean_e1, e1_peaks, channel_crossings, 'Left', 'Left', e1_peaks, e1_troughs,
-                                       e2_peaks, e2_troughs, rem_episodes_e1, episode, invert=False)
+            rems_df_e1p = rems_analyse(clean_e1, e1_peaks, channel_crossings, 'Left', 'Left', e1_peaks, e1_troughs, e2_peaks, e2_troughs,
+                             rem_episodes_e1, episode, is_peaks=True, invert=False)
 
-            rems_df_e1t = rems_analyse(clean_e1, e1_troughs, channel_crossings, 'Left', 'Right', e1_peaks, e1_troughs,
-                                       e2_peaks, e2_troughs, rem_episodes_e1, episode, invert=True)
+            rems_df_e1t = rems_analyse(clean_e1, e1_troughs, channel_crossings, 'Left', 'Right', e1_peaks, e1_troughs, e2_peaks,
+                             e2_troughs, rem_episodes_e1, episode, is_peaks=False, invert=True)
 
-            rems_df_e2p = rems_analyse(clean_e2, e2_peaks, channel_crossings, 'Right', 'Right', e1_peaks, e1_troughs,
-                                       e2_peaks, e2_troughs, rem_episodes_e2, episode, invert=False)
+            rems_df_e2p = rems_analyse(clean_e2, e2_peaks, channel_crossings, 'Right', 'Right', e1_peaks, e1_troughs, e2_peaks,
+                             e2_troughs, rem_episodes_e2, episode, is_peaks=True, invert=False)
 
-            rems_df_e2t = rems_analyse(clean_e2, e2_troughs, channel_crossings, 'Right', 'Left', e1_peaks, e1_troughs,
-                                       e2_peaks, e2_troughs, rem_episodes_e2, episode, invert=True)
+            rems_df_e2t = rems_analyse(clean_e2, e2_troughs, channel_crossings, 'Right', 'Left', e1_peaks, e1_troughs, e2_peaks,
+                             e2_troughs, rem_episodes_e2, episode, is_peaks=False, invert=True)
 
             rems_df = rems_df.append([rems_df_e1p, rems_df_e1t, rems_df_e2p, rems_df_e2t])  # compile rem characteristics
 
