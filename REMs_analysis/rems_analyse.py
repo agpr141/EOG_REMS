@@ -22,7 +22,7 @@ warnings.filterwarnings("ignore")
 
 
 def rems_analyse(signal, peaks_troughs, channel_crossings, eye, direction, e1_peaks, e1_troughs, e2_peaks, e2_troughs,
-                 rem_episodes, episode, invert=False):
+                 rem_episodes, episode, is_peaks, invert=False):
 
     rems_start_crossings, rems_end_crossings, start_to_peak_distances, peak_to_end_distances = \
         match_crossing_to_peaks(peaks_troughs, channel_crossings)
@@ -34,7 +34,7 @@ def rems_analyse(signal, peaks_troughs, channel_crossings, eye, direction, e1_pe
                        peak_to_end_distances)
 
     rems_df = rems_characteristics(episode, rem_episodes, peaks_troughs, rems_start_crossings, rems_end_crossings,
-                                   rems_local_minima, e1_peaks, e2_peaks, e1_troughs, e2_troughs, eye, direction)
+                                   rems_local_minima, e1_peaks, e2_peaks, e1_troughs, e2_troughs, eye, direction, is_peaks)
 
     return rems_df
 

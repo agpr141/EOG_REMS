@@ -577,7 +577,7 @@ def find_landmarks(epochs, peak_troughs, rems_start_crossings, rems_end_crossing
 
 
 def rems_characteristics(episode_count, rem_episodes, peaks_troughs, rems_start_crossings, rems_end_crossings,
-                         rems_local_minima, e1_peaks, e2_peaks, e1_troughs, e2_troughs, eye, direction):
+                         rems_local_minima, e1_peaks, e2_peaks, e1_troughs, e2_troughs, eye, direction, is_peaks):
     # calculate values
     ep = rem_episodes[episode_count]
     ep = np.ndarray.flatten(ep)
@@ -609,32 +609,61 @@ def rems_characteristics(episode_count, rem_episodes, peaks_troughs, rems_start_
     post_peak_distance = []
 
     # calculate distance between peaks
-    all_peaks = e1_peaks + e2_peaks + e1_troughs + e2_troughs
+    all_peaks = e1_peaks + e2_peaks
     sorted_all_peaks = sorted(all_peaks)
     sorted_all_peaks_dict = dict.fromkeys(sorted_all_peaks)
     sorted_all_peaks = list(sorted_all_peaks_dict)
 
-    for index, value in enumerate(peaks_troughs):
-        last_index = len(peaks_troughs) - 1
-        nearest_peak = find_nearest(sorted_all_peaks, value)
-        peak_in_list = (np.where(sorted_all_peaks == nearest_peak))[0]
-        peak_in_list = np.ndarray.flatten(peak_in_list)
-        peak_in_list = int(peak_in_list)
-        if peaks_troughs[index] == peaks_troughs[0]:
-            prior_peak_val = 'NaN'
-            prior_peak_distance.append(prior_peak_val)
-        else:
-            prior_peak_val = sorted_all_peaks[peak_in_list - 1]
-            prior_peak_s = (value - prior_peak_val) / 256
-            prior_peak_distance.append(prior_peak_s)
+    all_troughs = e1_troughs + e2_troughs
+    sorted_all_troughs = sorted(all_troughs)
+    sorted_all_troughs_dict = dict.fromkeys(sorted_all_troughs)
+    sorted_all_troughs = list(sorted_all_troughs_dict)
 
-        if peaks_troughs[index] == peaks_troughs[last_index]:
-            post_peak_val = 'NaN'
-            post_peak_distance.append(post_peak_val)
-        else:
-            post_peak_val = sorted_all_peaks[peak_in_list + 1]
-            post_peak_s = (post_peak_val - value) / 256
-            post_peak_distance.append(post_peak_s)
+    if is_peaks == True:
+        for index, value in enumerate(peaks_troughs):
+            last_index = len(peaks_troughs) - 1
+            nearest_peak = find_nearest(sorted_all_peaks, value)
+            peak_in_list = (np.where(sorted_all_peaks == nearest_peak))[0]
+            peak_in_list = np.ndarray.flatten(peak_in_list)
+            peak_in_list = int(peak_in_list)
+            if peaks_troughs[index] == peaks_troughs[0]:
+                prior_peak_val = 'NaN'
+                prior_peak_distance.append(prior_peak_val)
+            else:
+                prior_peak_val = sorted_all_peaks[peak_in_list - 1]
+                prior_peak_s = (value - prior_peak_val) / 256
+                prior_peak_distance.append(prior_peak_s)
+
+            if peaks_troughs[index] == peaks_troughs[last_index]:
+                post_peak_val = 'NaN'
+                post_peak_distance.append(post_peak_val)
+            else:
+                post_peak_val = sorted_all_peaks[peak_in_list + 1]
+                post_peak_s = (post_peak_val - value) / 256
+                post_peak_distance.append(post_peak_s)
+
+    elif is_peaks == False:
+        for index, value in enumerate(peaks_troughs):
+            last_index = len(peaks_troughs) - 1
+            nearest_trough = find_nearest(sorted_all_troughs, value)
+            trough_in_list = (np.where(sorted_all_troughs == nearest_trough))[0]
+            trough_in_list = np.ndarray.flatten(trough_in_list)
+            trough_in_list = int(trough_in_list)
+            if peaks_troughs[index] == peaks_troughs[0]:
+                prior_peak_val = 'NaN'
+                prior_peak_distance.append(prior_peak_val)
+            else:
+                prior_peak_val = sorted_all_troughs[trough_in_list - 1]
+                prior_peak_s = (value - prior_peak_val) / 256
+                prior_peak_distance.append(prior_peak_s)
+
+            if peaks_troughs[index] == peaks_troughs[last_index]:
+                post_peak_val = 'NaN'
+                post_peak_distance.append(post_peak_val)
+            else:
+                post_peak_val = sorted_all_troughs[trough_in_list + 1]
+                post_peak_s = (post_peak_val - value) / 256
+                post_peak_distance.append(post_peak_s)
 
     # calculate durations (in samples & seconds)
     duration_samps = []
